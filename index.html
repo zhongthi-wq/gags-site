@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<!-- Recreation of gag.gg profile page (Grow a Garden 2 theme). Self-contained, no tracking/ads. -->
+<html lang="vi" data-phase="day" data-ui="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#8fd6ef" />
+  <title>ItsJendal · gag.gg (clone)</title>
+
+  <!-- Nunito: tải khi mở bằng trình duyệt; nếu offline sẽ fallback sang font hệ thống -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --sky-blue: #25a8e6;
+      --sky-blue-bright: #5ec8ff;
+      --sky-blue-deep: #1577b0;
+      --gold: #f6c518;
+      --gold-deep: #c8930a;
+      --green: #67c23f;
+      --green-deep: #3c8a26;
+      --leaf: #8ed96a;
+      --ink: #243018;
+
+      --text-0: #25331b;
+      --text-1: #4f5f40;
+      --text-2: #88937c;
+
+      --radius-s: 10px;
+      --radius-m: 16px;
+      --radius-l: 22px;
+      --maxw: 700px;
+      --topbar-h: 56px;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+      --sky-top: #8fd6ef;
+      --sky-bottom: #cdeedd;
+
+      --font: "Nunito", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html, body { margin: 0; padding: 0; }
+    html {
+      font-family: var(--font);
+      background: var(--sky-top);
+      color: var(--text-0);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+    body {
+      min-height: 100dvh;
+      overflow-x: hidden;
+      padding-top: calc(var(--topbar-h) + var(--safe-top));
+      animation: pageFadeIn .8s ease both;
+    }
+    h1, h2, h3, p { margin: 0; }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+    img { display: block; max-width: 100%; }
+    :focus-visible { outline: 3px solid var(--sky-blue-deep); outline-offset: 2px; }
+
+    @keyframes pageFadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
+    @keyframes contentRise { 0% { opacity: 0; transform: translateY(12px); } 100% { opacity: 1; transform: none; } }
+
+    /* ---------- SKY BACKGROUND ---------- */
+    .sky { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .sky__grad { position: absolute; inset: 0; background: linear-gradient(180deg, var(--sky-top), var(--sky-bottom)); }
+    .sky__stars { position: absolute; inset: 0; opacity: 0; clip-path: inset(calc(var(--topbar-h) + var(--safe-top)) 0 0 0); transition: opacity .8s ease; }
+    .sky__stars .star { position: absolute; border-radius: 50%; background: #fff; animation: twinkle var(--tw, 2s) ease-in-out infinite alternate; }
+    @keyframes twinkle { 0% { opacity: .3; } 100% { opacity: .95; } }
+
+    .sky__clouds { position: absolute; inset: 0; clip-path: inset(calc(var(--topbar-h) + var(--safe-top)) 0 0 0); transition: opacity .8s ease; }
+    .cloud {
+      position: absolute; width: 70px; height: 26px; background: #fff; border-radius: 50px; opacity: .95;
+      box-shadow: 28px 6px 0 -4px #fff, -26px 8px 0 -6px #fff, 12px -12px 0 -4px #fff;
+      will-change: transform;
+    }
+    .cloud::after { content: ""; position: absolute; inset: 0; border-radius: 50px; background: linear-gradient(180deg, #fff, #e7f3fb); }
+    .cloud--a { top: 14%; left: -10%; --s: 1.1; animation: drift 80s linear infinite; }
+    .cloud--b { top: 26%; left: -10%; --s: .8;  animation: drift 120s linear infinite; animation-delay: -40s; }
+    .cloud--c { top: 8%;  left: -10%; --s: .65; animation: drift 100s linear infinite; animation-delay: -70s; }
+    @keyframes drift { 0% { transform: translate(0) scale(var(--s, 1)); } 100% { transform: translate(130vw) scale(var(--s, 1)); } }
+
+    .sky__sun, .sky__moon {
+      position: absolute; left: 58%; top: 19%; width: 70px; height: 70px; margin: -35px 0 0 -35px; border-radius: 50%;
+      will-change: left, top, opacity; transition: left 1s linear, top 1s linear, opacity 1s linear;
+    }
+    .sky__sun { background: radial-gradient(circle at 42% 38%, #fff4b0, #ffd23a 58%, #ffae00); box-shadow: 0 0 0 8px #ffdc5a59, 0 0 40px 10px #ffc80066; }
+    .sky__moon { background: radial-gradient(circle at 38% 32%, #fff, #dbe4ff 62%, #b3c0e8); box-shadow: 0 0 26px 6px #c8d7ff66; opacity: 0; }
+
+    /* ---------- TOPBAR ---------- */
+    .topbar {
+      position: fixed; inset: 0 0 auto; z-index: 30;
+      height: calc(var(--topbar-h) + var(--safe-top)); padding-top: var(--safe-top);
+      background: #0e142421; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,.1);
+    }
+    .topbar__inner {
+      height: var(--topbar-h); max-width: var(--maxw); margin: 0 auto; padding: 0 12px;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    }
+    .topbar__home { display: flex; align-items: center; gap: 8px; }
+    .topbar__actions { display: flex; align-items: center; gap: 8px; }
+
+    /* logo "studs" square with ^_^ face */
+    .avatar {
+      position: relative; width: 36px; height: 36px; border-radius: 10px;
+      background: linear-gradient(180deg, #7bd45a, var(--green)); border: 2px solid var(--ink);
+      display: grid; place-items: center; box-shadow: 0 3px 0 var(--green-deep); transition: transform .12s ease;
+      background-image: radial-gradient(circle at 50% 35%, rgba(255,255,255,.18) 0 22%, rgba(0,0,0,.06) 38% 46%, transparent 50%);
+      background-size: 26px 26px;
+    }
+    .topbar__home:hover .avatar { transform: translateY(-1px) rotate(-4deg) scale(1.06); }
+    .topbar__home:active .avatar { transform: translateY(2px) scale(.96); }
+    .avatar__face { font-size: 12px; font-weight: 900; color: var(--ink); transform: translateY(-1px); }
+
+    /* carrots pill */
+    .topbar__carrots {
+      position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 0;
+      height: 40px; padding: 0 11px; border-radius: 10px; color: #fff; font-weight: 900; font-size: .95rem;
+      background: linear-gradient(180deg, #ffd35a57, #f59a1f57); border: 1px solid rgba(255,224,140,.6);
+      box-shadow: inset 0 1px #ffffff4d, 0 2px #0000002e; transition: filter .12s ease;
+    }
+    .topbar__carrots:hover { filter: brightness(1.06); }
+    .topbar__carrot-img { width: 22px; height: 22px; margin-left: -5px; margin-right: -3px; filter: drop-shadow(0 1px 1px rgba(0,0,0,.28)); }
+    .topbar__carrot-count { font-variant-numeric: tabular-nums; min-width: 1ch; text-shadow: 0 1px 2px rgba(0,0,0,.4); }
+
+    /* roblox user chip */
+    .rbxauth__user { position: relative; display: inline-flex; min-width: 164px; max-width: 230px; }
+    .rbxauth__chip {
+      display: inline-flex; align-items: center; justify-content: flex-start; width: 100%; gap: 8px;
+      height: 40px; padding: 0 10px 0 6px; border-radius: 10px; color: #fff; font-weight: 800; font-size: .92rem;
+      background: #ffffff29; border: 1px solid rgba(255,255,255,.24); box-shadow: inset 0 1px #ffffff2e, 0 2px #00000038;
+      transition: filter .12s ease;
+    }
+    .rbxauth__chip:hover { filter: brightness(1.1); }
+    .rbxauth__avatar { width: 28px; height: 28px; border-radius: 8px; background: #ffffff40; object-fit: cover; flex: 0 0 auto; }
+    .rbxauth__name { flex: 1 1 auto; min-width: 0; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    /* Login button (Roblox sign-in) */
+    .rbxauth__signin {
+      display: inline-flex; align-items: center; gap: 7px; height: 40px; padding: 0 13px; border-radius: 10px;
+      text-decoration: none; font-weight: 800; font-size: .92rem; color: #fff;
+      background: linear-gradient(180deg, #5571ff, #3e5ef6);
+      box-shadow: inset 0 1px #ffffff59, 0 2px #2b43c2, 0 4px 10px #283cc873;
+      transition: filter .12s ease, transform .08s ease, box-shadow .08s ease;
+    }
+    .rbxauth__signin:hover { filter: brightness(1.08); }
+    .rbxauth__signin:active { transform: translateY(2px); box-shadow: inset 0 1px #ffffff59, 0 0 #2b43c2, 0 2px 6px #283cc873; }
+    .rbxauth__mark { width: 16px; height: 16px; display: block; filter: drop-shadow(0 1px 0 rgba(0,0,0,.15)); }
+    .rbxauth__label { white-space: nowrap; }
+    @media (max-width: 420px) { .rbxauth__signin { gap: 6px; padding: 0 10px; font-size: .84rem; } .rbxauth__mark { width: 14px; height: 14px; } }
+    .rbxauth__chevron { width: 14px; height: 14px; flex: 0 0 auto; opacity: .75; }
+
+    /* audio toggle */
+    .topbar__audio {
+      display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 10px;
+      background: #ffffff29; border: 1px solid rgba(255,255,255,.24); color: #fff; box-shadow: inset 0 1px #ffffff2e, 0 2px #00000038;
+      transition: filter .12s ease, transform .08s ease, box-shadow .08s ease, background-color .2s ease;
+    }
+    .topbar__audio:hover { filter: brightness(1.12); background: #ffffff38; }
+    .topbar__audio:active { transform: translateY(2px); box-shadow: inset 0 1px #ffffff2e, 0 0 #00000038; }
+    .topbar__audio svg { width: 20px; height: 20px; filter: drop-shadow(0 1px 0 rgba(0,0,0,.15)); }
+
+    /* vote (green) */
+    .topbar__vote {
+      display: inline-flex; align-items: center; gap: 7px; height: 40px; padding: 0 13px; border-radius: 10px;
+      font-weight: 800; font-size: .92rem; color: #fff;
+      background: linear-gradient(180deg, var(--leaf), var(--green));
+      box-shadow: inset 0 1px #ffffff59, 0 2px 0 var(--green-deep), 0 4px 10px #32963c66;
+      transition: filter .12s ease, transform .08s ease, box-shadow .08s ease;
+    }
+    .topbar__vote:hover { filter: brightness(1.08); }
+    .topbar__vote:active { transform: translateY(2px); box-shadow: inset 0 1px #ffffff59, 0 0 0 var(--green-deep), 0 2px 6px #32963c66; }
+    .topbar__vote-icon { width: 16px; height: 16px; filter: drop-shadow(0 1px 0 rgba(0,0,0,.15)); }
+
+    /* guild (orange/gold) */
+    .topbar__guild {
+      display: inline-flex; align-items: center; gap: 7px; height: 40px; padding: 0 13px; border-radius: 10px;
+      font-weight: 800; font-size: .92rem; color: #5a3c06;
+      background: linear-gradient(180deg, #ffd34d, #f5a623);
+      box-shadow: inset 0 1px #ffffff73, 0 2px #c97f12, 0 4px 10px #d6961e66;
+      text-shadow: 0 1px 0 rgba(255,255,255,.3);
+      transition: filter .12s ease, transform .08s ease, box-shadow .08s ease;
+    }
+    .topbar__guild:hover { filter: brightness(1.05); }
+    .topbar__guild:active { transform: translateY(2px); box-shadow: inset 0 1px #ffffff73, 0 0 #c97f12, 0 2px 6px #d6961e66; }
+    .topbar__guild-icon { width: 17px; height: 17px; filter: drop-shadow(0 1px 0 rgba(255,255,255,.3)); }
+
+    /* play CTA (blue) */
+    .topbar__cta {
+      display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 10px;
+      background: linear-gradient(180deg, #5571ff, #3e5ef6); color: #fff;
+      box-shadow: inset 0 1px #ffffff59, 0 2px #2b43c2, 0 4px 10px #283cc873;
+      transition: filter .12s ease, transform .08s ease, box-shadow .08s ease;
+    }
+    .topbar__cta:hover { filter: brightness(1.07); }
+    .topbar__cta:active { transform: translateY(2px); box-shadow: inset 0 1px #ffffff59, 0 0 #2b43c2, 0 2px 6px #283cc873; }
+    .topbar__cta svg { width: 18px; height: 18px; filter: drop-shadow(0 1px 0 rgba(0,0,0,.15)); }
+
+    @media (max-width: 560px) {
+      .topbar__vote, .topbar__guild { width: 40px; padding: 0; gap: 0; justify-content: center; }
+      .topbar__vote-label, .topbar__guild-label { display: none; }
+      .rbxauth__user { min-width: 0; max-width: none; }
+      .rbxauth__name { max-width: 5ch; }
+    }
+
+    /* ---------- MAIN (centered, zoomed like the original) ---------- */
+    .app-main {
+      position: relative; z-index: 1; width: 100%; max-width: var(--maxw); margin: 0 auto;
+      min-height: calc(100dvh - var(--topbar-h) - var(--safe-top));
+      padding: clamp(16px,3vh,32px) 20px calc(clamp(8px,1.5vh,16px) + var(--safe-bottom));
+      display: flex; flex-direction: column; justify-content: center; gap: clamp(16px,3vh,30px);
+      animation: contentRise .85s .05s cubic-bezier(.2,.7,.2,1) both;
+      zoom: 1.5; min-height: calc((100dvh - var(--topbar-h) - var(--safe-top)) / 1.5);
+    }
+    @media (max-width: 1049px) { .app-main { zoom: 1.3; min-height: calc((100dvh - var(--topbar-h) - var(--safe-top)) / 1.3); } }
+    @media (max-width: 909px)  { .app-main { zoom: 1.2; min-height: calc((100dvh - var(--topbar-h) - var(--safe-top)) / 1.2); } }
+    @media (max-width: 839px)  { .app-main { zoom: 1.1; min-height: calc((100dvh - var(--topbar-h) - var(--safe-top)) / 1.1); } }
+    @media (max-width: 769px)  { .app-main { zoom: 1;   min-height: calc(100dvh - var(--topbar-h) - var(--safe-top)); } }
+
+    /* ---------- PROFILE CARD ---------- */
+    .up { width: min(560px, 100%); margin: clamp(12px,3vh,32px) auto; padding: 0 14px; }
+    .up__card {
+      background: #0e142421; border: 1px solid rgba(255,255,255,.14);
+      box-shadow: 0 14px 40px #0000003d, inset 0 1px #ffffff24;
+      backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+      border-radius: var(--radius-l); padding: clamp(16px,3vw,24px);
+    }
+    .up__head { display: flex; align-items: center; gap: 14px; }
+    .up__avatar {
+      width: 72px; height: 72px; border-radius: 50%; object-fit: cover;
+      background: #ffffff1a; border: 2px solid rgba(255,255,255,.2); flex: 0 0 auto;
+    }
+    .up__id { min-width: 0; }
+    .up__name { display: flex; align-items: center; gap: 7px; font-size: clamp(1.25rem,4vw,1.6rem); font-weight: 800; color: #fff; line-height: 1.15; }
+    .up__name-text { word-break: break-word; }
+    .up__verified { width: .82em; height: .82em; flex: 0 0 auto; filter: drop-shadow(0 1px 1px rgba(0,0,0,.28)); }
+    .up__verified[hidden] { display: none; }
+    .up__username { margin-top: 2px; color: #ffffffd1; font-weight: 600; }
+    .up__userid { margin-top: 2px; color: #fff9; font-size: .82rem; }
+
+    /* ---------- FEATURED TITLE / RANK ---------- */
+    .up__title {
+      display: inline-flex; align-items: center; gap: 8px; position: relative; overflow: hidden;
+      margin-top: 14px; padding: 9px 16px 9px 12px; border-radius: 999px;
+      font-weight: 900; font-size: .98rem; letter-spacing: .3px; color: #4a2f00;
+      background: linear-gradient(180deg, #ffe27a, #f0a81e);
+      border: 2px solid #c8930a;
+      box-shadow: inset 0 1px rgba(255,255,255,.55), 0 3px 0 #9c6708, 0 6px 16px rgba(240,168,30,.5);
+      text-shadow: 0 1px 0 rgba(255,255,255,.35);
+    }
+    .up__title-glyph { width: 19px; height: 19px; flex: 0 0 auto; filter: drop-shadow(0 1px 1px rgba(0,0,0,.25)); }
+    .up__title-text { position: relative; z-index: 1; }
+    .up__title-shine {
+      position: absolute; top: 0; left: -60%; width: 38%; height: 100%; pointer-events: none;
+      background: linear-gradient(100deg, transparent, rgba(255,255,255,.65), transparent);
+      transform: skewX(-20deg); animation: titleShine 3.6s ease-in-out infinite;
+    }
+    @keyframes titleShine { 0%, 55% { left: -60%; } 100% { left: 140%; } }
+
+    /* ---------- BADGES (tier-colored) ---------- */
+    .up__badges { margin-top: 16px; }
+    .up__badges-head {
+      display: flex; align-items: center; gap: 7px; margin-bottom: 9px;
+      font-weight: 900; font-size: .78rem; letter-spacing: .5px; text-transform: uppercase; color: #ffffffcf;
+    }
+    .up__badges-head::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 3px #67c23f33; }
+    .up__badges-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 7px; padding: 6px 13px 6px 9px; border-radius: 999px;
+      font-weight: 800; font-size: .82rem; color: #fff; white-space: nowrap; cursor: default;
+      background: var(--badge-bg); border: 1.5px solid var(--badge-bd);
+      box-shadow: inset 0 1px rgba(255,255,255,.22), 0 2px 0 var(--badge-edge);
+      transition: transform .1s ease, box-shadow .1s ease, filter .1s ease;
+    }
+    .badge:hover { transform: translateY(-2px); filter: brightness(1.07); box-shadow: inset 0 1px rgba(255,255,255,.22), 0 4px 0 var(--badge-edge); }
+    .badge__icon { font-size: 1.02rem; line-height: 1; filter: drop-shadow(0 1px 1px rgba(0,0,0,.3)); }
+    .badge--legendary { --badge-bg: linear-gradient(180deg, #ffe27a, #f0a81e); --badge-bd: #c8930a; --badge-edge: #9c6708; color: #4a2f00; text-shadow: 0 1px 0 rgba(255,255,255,.3); }
+    .badge--epic      { --badge-bg: linear-gradient(180deg, #b06bff, #9a55f0); --badge-bd: #7a36c8; --badge-edge: #5e29a0; }
+    .badge--rare      { --badge-bg: linear-gradient(180deg, #5bb0ff, #2f95ff); --badge-bd: #1d76d8; --badge-edge: #155bab; }
+    .badge--common    { --badge-bg: linear-gradient(180deg, #b7c0bb, #9aa6a0); --badge-bd: #7d8a83; --badge-edge: #5f6b64; }
+
+    /* ---------- TROPHIES (mutation cups) ---------- */
+    .up__medals { margin-top: 16px; }
+    .up__medals-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; }
+    .medal { position: relative; display: flex; flex-direction: column; align-items: center; padding-top: 4px; }
+    .medal__halo { position: absolute; left: 50%; top: 0; width: 142%; aspect-ratio: 1; transform: translate(-50%, -20%); pointer-events: none; z-index: 0; }
+    .medal__glow { position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 50% 50%, var(--glow, #fff) 0%, transparent 58%); opacity: .8; }
+    .medal__rays {
+      position: absolute; inset: 0;
+      background: repeating-conic-gradient(from 0deg at 50% 50%, rgba(255,255,255,.92) 0deg 1.5deg, transparent 1.5deg 7deg);
+      -webkit-mask: radial-gradient(circle at 50% 50%, #000 3%, rgba(0,0,0,.55) 24%, transparent 58%);
+              mask: radial-gradient(circle at 50% 50%, #000 3%, rgba(0,0,0,.55) 24%, transparent 58%);
+      animation: rayspin 34s linear infinite;
+    }
+    @keyframes rayspin { to { transform: rotate(360deg); } }
+    .medal__art { position: relative; z-index: 1; width: 100%; height: auto; display: block; filter: drop-shadow(0 3px 4px rgba(0,0,0,.32)); }
+    .medal__name { position: relative; z-index: 1; margin-top: 1px; font-weight: 800; font-size: .6rem; letter-spacing: .3px; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.5); text-align: center; white-space: nowrap; }
+
+    /* tier-themed parts (cascade into the shared <use> art) */
+    .tro-frill { stroke: var(--frill); }
+    .tro-ring { fill: var(--ring); }
+    .tro-center { fill: var(--center); }
+    .tro-star { fill: var(--star); }
+    .tro-tool { fill: var(--tool); }
+    .tro-ribbon { fill: var(--ribbon); }
+    .tro-brick { fill: var(--brick); }
+    .tro-brick-top { fill: var(--brick-top); }
+    .tro-brick-side { fill: var(--brick-side); }
+
+    .medal--bronze  { --frill:#c67e34; --ring:#9a5a1e; --center:#dd9a59; --star:#ffe9c8; --tool:#5a3410; --ribbon:#b8722b; --brick:#8c5a2e; --brick-top:#b27e44; --brick-side:#67421f; --glow:#ffdcab; }
+    .medal--emerald { --frill:#2fb56a; --ring:#1c8a4d; --center:#5fd18f; --star:#e8fff1; --tool:#115c32; --ribbon:#2aa75f; --brick:#1f9a52; --brick-top:#4fc47e; --brick-side:#16713c; --glow:#c7ffdc; }
+    .medal--opal    { --frill:#7cc6e6; --ring:#4f9ec4; --center:#bfeaf4; --star:#ffffff; --tool:#2f6f88; --ribbon:#6fbede; --brick:#54b2d2; --brick-top:#92d8ec; --brick-side:#3d8aa6; --glow:#e6fbff; }
+    .medal--gold    { --frill:#e89a1f; --ring:#c9851a; --center:#f3c24a; --star:#fff6c4; --tool:#7a5210; --ribbon:#e89a1f; --brick:#cda24a; --brick-top:#eccd7a; --brick-side:#a07f33; --glow:#ffe9a8; }
+
+    @media (prefers-reduced-motion: reduce) { .up__title-shine { display: none; } .medal__rays { animation: none; } }
+
+    .up__carrots {
+      display: flex; align-items: center; gap: 12px; margin-top: 12px; padding: 12px 14px;
+      border-radius: var(--radius-m); background: #ffffff0f; border: 1px solid rgba(255,255,255,.1);
+    }
+    .up__carrot-img { flex: 0 0 auto; filter: drop-shadow(0 2px 4px rgba(0,0,0,.25)); }
+    .up__carrot-info { display: flex; flex-direction: column; line-height: 1.1; }
+    .up__carrot-count { font-size: clamp(1.4rem,5vw,1.9rem); font-weight: 900; color: var(--gold); text-shadow: 0 1px 1px rgba(0,0,0,.18); }
+    .up__carrot-label { color: #ffffffd1; font-weight: 600; font-size: .85rem; }
+
+    /* brick button (signature game button) */
+    .brick-btn {
+      --btn: var(--green); --btn-edge: var(--green-deep);
+      position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 13px 22px; min-height: 50px; border: 3px solid var(--ink); border-radius: var(--radius-m);
+      font-weight: 900; font-size: 1rem; letter-spacing: .3px; color: #fff; background: var(--btn);
+      text-shadow: 0 2px 0 rgba(0,0,0,.28); box-shadow: 0 5px 0 var(--btn-edge);
+      transition: transform .1s ease, box-shadow .1s ease, filter .1s ease; user-select: none;
+    }
+    .brick-btn:hover { transform: translateY(-2px); filter: brightness(1.05) saturate(1.05); box-shadow: 0 7px 0 var(--btn-edge); }
+    .brick-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--btn-edge); }
+    .brick-btn--roblox { --btn-edge: #2b43c2; background: linear-gradient(180deg, #5571ff, #3e5ef6); }
+    .up__roblox { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; margin-top: clamp(14px,2.4vw,20px); }
+    .up__roblox-logo { width: 18px; height: 18px; flex: 0 0 auto; }
+    /* TikTok button */
+    .up__tiktok { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; margin-top: 10px; }
+    .brick-btn--tiktok { --btn-edge: #000; background: linear-gradient(180deg, #2d2d33, #060608); border-color: #050507; }
+    .up__tiktok-logo { width: 19px; height: 19px; flex: 0 0 auto; filter: drop-shadow(1.1px 0 0 #25f4ee) drop-shadow(-1.1px 0 0 #fe2c55); }
+    .up__tiktok-label { text-shadow: 0 2px 0 rgba(0,0,0,.28); }
+  </style>
+</head>
+<body>
+  <!--
+        🌱  GROW A GARDEN 2  🌱
+        Bản dựng lại giao diện gag.gg cho mục đích học tập.
+  -->
+
+  <!-- ===== SKY ===== -->
+  <div class="sky" aria-hidden="true">
+    <div class="sky__grad" data-sky-grad></div>
+    <div class="sky__stars" data-sky-stars></div>
+    <div class="sky__clouds" data-sky-clouds>
+      <span class="cloud cloud--a"></span>
+      <span class="cloud cloud--b"></span>
+      <span class="cloud cloud--c"></span>
+    </div>
+    <div class="sky__sun" data-sky-sun></div>
+    <div class="sky__moon" data-sky-moon></div>
+  </div>
+
+  <!-- ===== TOPBAR ===== -->
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="topbar__home" href="https://gag.gg/" aria-label="Grow a Garden 2 home">
+        <span class="avatar"><span class="avatar__face">^_^</span></span>
+      </a>
+
+      <div class="topbar__actions">
+        <!-- carrots -->
+        <a class="topbar__carrots" href="https://gag.gg/" title="Golden Carrots" aria-label="Golden Carrots — gag.gg">
+          <img class="topbar__carrot-img" src="data:image/svg+xml;utf8,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Cdefs%3E%3ClinearGradient%20id='b'%20x1='0'%20y1='0'%20x2='0'%20y2='1'%3E%3Cstop%20offset='0'%20stop-color='%23ffe79a'/%3E%3Cstop%20offset='.45'%20stop-color='%23ffc83d'/%3E%3Cstop%20offset='1'%20stop-color='%23f59a1f'/%3E%3C/linearGradient%3E%3ClinearGradient%20id='l'%20x1='0'%20y1='0'%20x2='0'%20y2='1'%3E%3Cstop%20offset='0'%20stop-color='%238fe85f'/%3E%3Cstop%20offset='1'%20stop-color='%233f9e2a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg%20fill='url(%23l)'%20stroke='%232f7d20'%20stroke-width='1.6'%20stroke-linejoin='round'%3E%3Cpath%20d='M30%2021C23.5%2017.5%2019.5%2013%2017.5%207.5%2024.8%207.5%2030.8%2011.5%2032%2019.5Z'/%3E%3Cpath%20d='M34%2021C40.5%2017.5%2044.5%2013%2046.5%207.5%2039.2%207.5%2033.2%2011.5%2032%2019.5Z'/%3E%3Cpath%20d='M32%2020.5C30.7%2012%2032.8%204.5%2033%204.2%2036.2%208.2%2036.2%2014.5%2033%2020.5Z'/%3E%3C/g%3E%3Cpath%20fill='url(%23b)'%20stroke='%23d9870f'%20stroke-width='2.4'%20stroke-linejoin='round'%20d='M19%2021.5C19%2016.8%2045%2016.8%2045%2021.5%2045%2031.5%2037.5%2055%2032%2059.5%2026.5%2055%2019%2031.5%2019%2021.5Z'/%3E%3Cg%20stroke='%23fff'%20stroke-opacity='.55'%20stroke-width='2.4'%20stroke-linecap='round'%3E%3Cpath%20d='M26.5%2026.5%2028%2033.5'/%3E%3Cpath%20d='M34.5%2025.5%2033.5%2035'/%3E%3Cpath%20d='M30.5%2041%2031.5%2047'/%3E%3C/g%3E%3C/svg%3E" alt="" width="22" height="22" />
+          <span class="topbar__carrot-count">20</span>
+        </a>
+
+        <!-- roblox login (giống navbar homepage gag.gg) -->
+        <a class="rbxauth__signin" href="https://gag.gg/api/auth/roblox/login" aria-label="Log in with Roblox">
+          <svg class="rbxauth__mark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5.164 0 0 18.836 18.836 24 24 5.164 5.164 0zm9.456 14.745-5.193-1.424 1.424-5.193 5.193 1.424-1.424 5.193z" /></svg>
+          <span class="rbxauth__label">Login</span>
+        </a>
+
+        <!-- audio -->
+        <a class="topbar__audio" href="https://gag.gg/" aria-label="Sound — gag.gg">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4.03v8.06A4.5 4.5 0 0 0 16.5 12zM14 3.23v2.06a7 7 0 0 1 0 13.42v2.06a9 9 0 0 0 0-17.54z" /></svg>
+        </a>
+
+        <!-- vote -->
+        <a class="topbar__vote" href="https://gag.gg/vote" aria-label="Vote">
+          <svg class="topbar__vote-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" /></svg>
+          <span class="topbar__vote-label">Vote</span>
+        </a>
+
+        <!-- guild -->
+        <a class="topbar__guild" href="https://gag.gg/guilds" aria-label="Guilds">
+          <svg class="topbar__guild-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" /></svg>
+          <span class="topbar__guild-label">Guilds</span>
+        </a>
+
+        <!-- play -->
+        <a class="topbar__cta" href="https://gag.gg/" aria-label="Play Grow a Garden 2">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== MAIN ===== -->
+  <main class="app-main">
+    <section class="up">
+      <article class="up__card">
+        <header class="up__head">
+          <img class="up__avatar" alt="ItsJendal's avatar" width="72" height="72"
+            src="data:image/svg+xml;utf8,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2072%2072'%3E%3Crect%20width='72'%20height='72'%20fill='%23dfe9ef'/%3E%3Crect%20x='18'%20y='52'%20width='36'%20height='24'%20rx='6'%20fill='%23c0392b'/%3E%3Crect%20x='30'%20y='44'%20width='12'%20height='12'%20fill='%23e8b98f'/%3E%3Crect%20x='22'%20y='20'%20width='28'%20height='28'%20rx='8'%20fill='%23f0c089'/%3E%3Cpath%20d='M20%2030C20%2014%2052%2014%2052%2030L52%2024C48%2020%2024%2020%2024%2028Z'%20fill='%235a3a22'/%3E%3Ccircle%20cx='31'%20cy='33'%20r='2.4'%20fill='%23222'/%3E%3Ccircle%20cx='41'%20cy='33'%20r='2.4'%20fill='%23222'/%3E%3Cpath%20d='M30%2039Q36%2045%2042%2039'%20stroke='%23222'%20stroke-width='2'%20fill='none'%20stroke-linecap='round'/%3E%3C/svg%3E" />
+          <div class="up__id">
+            <h1 class="up__name">
+              <span class="up__name-text">Lossi</span>
+              <svg class="up__verified" viewBox="0 0 24 24" role="img" aria-label="Verified">
+                <defs><linearGradient id="vbg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5b8bff" /><stop offset="1" stop-color="#2f6df0" /></linearGradient></defs>
+                <rect x="3" y="3" width="18" height="18" rx="6.5" fill="url(#vbg)" stroke="#2150c2" stroke-width="1" />
+                <path d="M10.1 15.7 6.7 12.3l1.5-1.5 1.9 1.9 4.6-4.6 1.5 1.5z" fill="#fff" />
+              </svg>
+            </h1>
+            <p class="up__username">@noname080245</p>
+            <p class="up__userid">Roblox ID 8551124830</p>
+          </div>
+        </header>
+
+        <!-- Featured title / rank -->
+        <div class="up__title">
+          <svg class="up__title-glyph" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75C3 17 4 13 9 11s9-3 9-3z" /></svg>
+          <span class="up__title-text">Expert Gardener</span>
+          <span class="up__title-shine" aria-hidden="true"></span>
+        </div>
+
+        <!-- Badges -->
+        <div class="up__badges">
+          <span class="up__badges-head">Badges</span>
+          <div class="up__badges-row">
+            <span class="badge badge--legendary" title="Carrot King — Top carrot collector"><span class="badge__icon">🥕</span> Carrot King</span>
+            <span class="badge badge--epic" title="Harvest Master — Harvested 10,000 crops"><span class="badge__icon">🌾</span> Harvest Master</span>
+            <span class="badge badge--rare" title="Green Thumb — Reached level 50"><span class="badge__icon">🌿</span> Green Thumb</span>
+            <span class="badge badge--common" title="Veteran — Playing since launch"><span class="badge__icon">🌱</span> Veteran</span>
+          </div>
+        </div>
+
+        <!-- Medals (Bronze · Emerald · Opal · Gold) -->
+        <div class="up__medals">
+          <span class="up__badges-head">Medals</span>
+
+          <!-- shared medal artwork: drawn once, recolored per tier via CSS variables -->
+          <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+            <defs>
+              <pattern id="t-studs" width="9" height="9" patternUnits="userSpaceOnUse">
+                <circle cx="4.5" cy="5" r="3.2" fill="rgba(255,255,255,.08)" />
+                <circle cx="4.5" cy="4" r="2.4" fill="rgba(255,255,255,.16)" />
+              </pattern>
+              <g id="t-star"><path d="M12 2 14.9 8.6 22 9.2 16.5 13.9 18.3 21 12 17.1 5.7 21 7.5 13.9 2 9.2 9.1 8.6Z" transform="translate(-12,-11.5)" /></g>
+              <g id="t-medal">
+                <!-- ribbon tails -->
+                <path class="tro-ribbon" d="M41 62 L31 67 L32 97 L41 89 Z" />
+                <path class="tro-ribbon" d="M59 62 L69 67 L68 97 L59 89 Z" />
+                <!-- pedestal brick -->
+                <path class="tro-brick-top" d="M30 104 L40 97 L80 97 L70 104 Z" />
+                <path class="tro-brick-side" d="M70 104 L80 97 L80 120 L70 127 Z" />
+                <rect class="tro-brick" x="30" y="104" width="40" height="23" rx="3" />
+                <ellipse class="tro-brick-top" cx="46" cy="100.5" rx="4" ry="1.9" />
+                <ellipse class="tro-brick-top" cx="60" cy="100.5" rx="4" ry="1.9" />
+                <!-- rosette -->
+                <circle class="tro-frill" cx="50" cy="46" r="33" fill="none" stroke-width="13" stroke-dasharray="6 4.5" />
+                <circle class="tro-ring" cx="50" cy="46" r="35" />
+                <circle class="tro-center" cx="50" cy="46" r="27" />
+                <circle cx="50" cy="46" r="27" fill="url(#t-studs)" />
+                <circle cx="50" cy="46" r="27" fill="none" stroke="rgba(0,0,0,.14)" stroke-width="1.4" />
+                <!-- crossed garden tools -->
+                <g class="tro-tool" transform="translate(50,46)">
+                  <g transform="rotate(-25)">
+                    <rect x="-1.5" y="-14" width="3" height="19" rx="1.5" />
+                    <rect x="-4.8" y="-16.5" width="9.6" height="3.2" rx="1.6" />
+                    <path d="M-4.4 5 L4.4 5 L2.9 12.5 Q0 15.5 -2.9 12.5 Z" />
+                  </g>
+                  <g transform="rotate(25)">
+                    <rect x="-1.5" y="-14" width="3" height="21" rx="1.5" />
+                    <rect x="-6.3" y="6.3" width="12.6" height="3" rx="1.3" />
+                    <rect x="-5.2" y="8.6" width="1.9" height="4.3" rx="0.8" />
+                    <rect x="-1.6" y="8.6" width="1.9" height="4.3" rx="0.8" />
+                    <rect x="2" y="8.6" width="1.9" height="4.3" rx="0.8" />
+                    <rect x="4.3" y="8.6" width="1.7" height="4.3" rx="0.8" />
+                  </g>
+                </g>
+                <!-- stars -->
+                <use href="#t-star" class="tro-star" transform="translate(50,22) scale(.46)" />
+                <use href="#t-star" class="tro-star" transform="translate(68,33) scale(.44)" />
+                <use href="#t-star" class="tro-star" transform="translate(69,53) scale(.4)" />
+                <use href="#t-star" class="tro-star" transform="translate(32,33) scale(.44)" />
+                <use href="#t-star" class="tro-star" transform="translate(31,53) scale(.4)" />
+              </g>
+            </defs>
+          </svg>
+
+          <div class="up__medals-row">
+            <div class="medal medal--bronze">
+              <span class="medal__halo"><span class="medal__glow"></span><span class="medal__rays"></span></span>
+              <svg class="medal__art" viewBox="0 0 100 132"><use href="#t-medal" /></svg>
+              <span class="medal__name">Bronze</span>
+            </div>
+            <div class="medal medal--emerald">
+              <span class="medal__halo"><span class="medal__glow"></span><span class="medal__rays"></span></span>
+              <svg class="medal__art" viewBox="0 0 100 132"><use href="#t-medal" /></svg>
+              <span class="medal__name">Emerald</span>
+            </div>
+            <div class="medal medal--opal">
+              <span class="medal__halo"><span class="medal__glow"></span><span class="medal__rays"></span></span>
+              <svg class="medal__art" viewBox="0 0 100 132"><use href="#t-medal" /></svg>
+              <span class="medal__name">Opal</span>
+            </div>
+            <div class="medal medal--gold">
+              <span class="medal__halo"><span class="medal__glow"></span><span class="medal__rays"></span></span>
+              <svg class="medal__art" viewBox="0 0 100 132"><use href="#t-medal" /></svg>
+              <span class="medal__name">Gold</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="up__carrots">
+          <img class="up__carrot-img" width="44" height="44" alt=""
+            src="data:image/svg+xml;utf8,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Cdefs%3E%3ClinearGradient%20id='b'%20x1='0'%20y1='0'%20x2='0'%20y2='1'%3E%3Cstop%20offset='0'%20stop-color='%23ffe79a'/%3E%3Cstop%20offset='.45'%20stop-color='%23ffc83d'/%3E%3Cstop%20offset='1'%20stop-color='%23f59a1f'/%3E%3C/linearGradient%3E%3ClinearGradient%20id='l'%20x1='0'%20y1='0'%20x2='0'%20y2='1'%3E%3Cstop%20offset='0'%20stop-color='%238fe85f'/%3E%3Cstop%20offset='1'%20stop-color='%233f9e2a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg%20fill='url(%23l)'%20stroke='%232f7d20'%20stroke-width='1.6'%20stroke-linejoin='round'%3E%3Cpath%20d='M30%2021C23.5%2017.5%2019.5%2013%2017.5%207.5%2024.8%207.5%2030.8%2011.5%2032%2019.5Z'/%3E%3Cpath%20d='M34%2021C40.5%2017.5%2044.5%2013%2046.5%207.5%2039.2%207.5%2033.2%2011.5%2032%2019.5Z'/%3E%3Cpath%20d='M32%2020.5C30.7%2012%2032.8%204.5%2033%204.2%2036.2%208.2%2036.2%2014.5%2033%2020.5Z'/%3E%3C/g%3E%3Cpath%20fill='url(%23b)'%20stroke='%23d9870f'%20stroke-width='2.4'%20stroke-linejoin='round'%20d='M19%2021.5C19%2016.8%2045%2016.8%2045%2021.5%2045%2031.5%2037.5%2055%2032%2059.5%2026.5%2055%2019%2031.5%2019%2021.5Z'/%3E%3Cg%20stroke='%23fff'%20stroke-opacity='.55'%20stroke-width='2.4'%20stroke-linecap='round'%3E%3Cpath%20d='M26.5%2026.5%2028%2033.5'/%3E%3Cpath%20d='M34.5%2025.5%2033.5%2035'/%3E%3Cpath%20d='M30.5%2041%2031.5%2047'/%3E%3C/g%3E%3C/svg%3E" />
+          <div class="up__carrot-info">
+            <span class="up__carrot-count">20</span>
+            <span class="up__carrot-label">Golden Carrots</span>
+          </div>
+        </div>
+
+        <a class="brick-btn brick-btn--roblox up__roblox" href="https://www.roblox.com/users/8551124830/profile" target="_blank" rel="noopener">
+          <svg class="up__roblox-logo" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.926 23.998 0 18.892 5.075.002 24 5.108ZM15.348 10.09l-5.282-1.453-1.414 5.273 5.282 1.453z" /></svg>
+          View on Roblox
+        </a>
+        <a class="brick-btn brick-btn--tiktok up__tiktok" href="https://www.tiktok.com/@gag2trader12" target="_blank" rel="noopener">
+          <svg class="up__tiktok-logo" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.53.02C13.84 0 15.14.01 16.44 0c.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" /></svg>
+          <span class="up__tiktok-label">TikTok</span>
+        </a>
+      </article>
+    </section>
+  </main>
+
+  <!-- ============ CHỈNH HỒ SƠ Ở ĐÂY ============ -->
+  <script>
+    window.PROFILE = {
+      name: "Lossi",
+      username: "noname080245",                  // không cần dấu @
+      robloxId: "8551124830",                     // số trong link .../users/<ID>/profile
+      carrots: 20,
+      title: "Expert Gardener",
+      verified: true,                                     // tick xanh cạnh tên (đặt false để ẩn)
+      tiktok: "https://www.tiktok.com/@gag2trader12"      // ⬅️ đổi link TikTok (để "" để ẩn nút)
+    };
+    // (Tùy chọn) Ghi đè dữ liệu theo từng user khi deploy /u/<username>. Key = username Roblox (viết thường).
+    window.PROFILE_OVERRIDES = {
+      "noname080245": { verified: true, tiktok: "https://www.tiktok.com/@gag2trader12", carrots: 20, title: "Expert Gardener" }
+    };
+  </script>
+  <!-- =========================================== -->
+
+  <script>
+    (function () {
+      var P = window.PROFILE || {};
+      // Ảnh "bake" sẵn cho ID này -> hiện ngay tức thì. Đổi robloxId thì fetch tự lấy ảnh mới.
+      var BAKED = { id: "8551124830", src: "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-E084C56DCA2B77DF5631D66B7787B30D-Png/420/420/AvatarHeadshot/Png/noFilter" };
+
+      var $ = function (s) { return document.querySelector(s); };
+      var setText = function (s, v) { var e = $(s); if (e && v != null) e.textContent = v; };
+
+      // ----- Text fields -----
+      if (P.name) { document.title = P.name + " · gag.gg"; setText(".up__name-text", P.name); setText(".rbxauth__name", P.name); }
+      var vbadge = $(".up__verified"); if (vbadge) vbadge.hidden = (P.verified === false);
+      if (P.username) setText(".up__username", "@" + P.username);
+      if (P.robloxId) setText(".up__userid", "Roblox ID " + P.robloxId);
+      if (P.title) setText(".up__title-text", P.title);
+      if (P.carrots != null) { setText(".up__carrot-count", P.carrots); setText(".topbar__carrot-count", P.carrots); }
+
+      // ----- Roblox link -----
+      if (P.robloxId) { var rb = $(".up__roblox"); if (rb) rb.href = "https://www.roblox.com/users/" + encodeURIComponent(P.robloxId) + "/profile"; }
+
+      // ----- TikTok (tùy chỉnh) -----
+      var tk = $(".up__tiktok");
+      if (tk) {
+        if (P.tiktok) {
+          tk.href = P.tiktok;
+          var m = String(P.tiktok).match(/@([\w.]+)/);
+          var lbl = tk.querySelector(".up__tiktok-label");
+          if (lbl && m) lbl.textContent = "@" + m[1];
+          tk.hidden = false;
+        } else { tk.hidden = true; }
+      }
+
+      // ----- Fetch avatar Roblox (mirror có CORS -> dự phòng -> placeholder) -----
+      var avatars = [$(".up__avatar"), $(".rbxauth__avatar")].filter(Boolean);
+      var fallback = avatars.map(function (el) { return el.src; }); // giữ SVG placeholder làm dự phòng cuối
+      function applyAvatar(url) {
+        avatars.forEach(function (el, i) {
+          el.onerror = function () { el.onerror = null; el.src = fallback[i]; };
+          el.src = url;
+        });
+      }
+      function fetchAvatar(id) {
+        var q = "userIds=" + id + "&size=420x420&format=Png&isCircular=false";
+        var srcs = [
+          "https://thumbnails.roproxy.com/v1/users/avatar-headshot?" + q,
+          "https://api.allorigins.win/raw?url=" + encodeURIComponent("https://thumbnails.roblox.com/v1/users/avatar-headshot?" + q)
+        ];
+        (function next(i) {
+          if (i >= srcs.length) return; // hết nguồn -> giữ ảnh hiện tại
+          fetch(srcs[i]).then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+            .then(function (d) {
+              var u = d && d.data && d.data[0] && d.data[0].imageUrl;
+              if (u) applyAvatar(u); else next(i + 1);
+            })
+            .catch(function () { next(i + 1); });
+        })(0);
+      }
+
+      if (P.robloxId) {
+        if (BAKED.src && P.robloxId === BAKED.id) applyAvatar(BAKED.src); // hiện ngay
+        fetchAvatar(P.robloxId); // cập nhật bản mới / dùng cho ID khác
+      }
+    })();
+  </script>
+
+  <!-- ============ NGÀY/ĐÊM THEO THỜI GIAN (đồng bộ /api/time) ============ -->
+  <script>
+    (function () {
+      var grad = document.querySelector('[data-sky-grad]');
+      var stars = document.querySelector('[data-sky-stars]');
+      var clouds = document.querySelector('[data-sky-clouds]');
+      var sun = document.querySelector('[data-sky-sun]');
+      var moon = document.querySelector('[data-sky-moon]');
+
+      // Sinh sao (seeded RNG giống bản gốc gag.gg)
+      if (stars && !stars.childElementCount) {
+        var seed = 42, rng = function () { seed = (seed * 1103515245 + 12345) & 2147483647; return seed / 2147483647; };
+        var frag = document.createDocumentFragment();
+        for (var i = 0; i < 36; i++) {
+          var sp = document.createElement('span'), sz = 1 + rng() * 2;
+          sp.className = 'star';
+          sp.style.left = (rng() * 100) + '%'; sp.style.top = (rng() * 55) + '%';
+          sp.style.width = sz + 'px'; sp.style.height = sz + 'px';
+          sp.style.setProperty('--tw', (1.8 + rng() * 2.4) + 's');
+          frag.appendChild(sp);
+        }
+        stars.appendChild(frag);
+      }
+
+      // Bảng màu trời (lấy y nguyên từ gag.gg)
+      var DAY = [[140,212,240],[206,238,222]], SUNSET = [[46,54,110],[255,144,92]],
+          NIGHT = [[8,13,36],[24,33,70]], DAWN = [[60,70,132],[255,192,170]];
+      var clamp = function (v, lo, hi) { return Math.min(hi, Math.max(lo, v)); };
+      var lerp = function (a, b, t) { return [Math.round(a[0]+(b[0]-a[0])*t), Math.round(a[1]+(b[1]-a[1])*t), Math.round(a[2]+(b[2]-a[2])*t)]; };
+      var rgb = function (c) { return 'rgb(' + c[0] + ', ' + c[1] + ', ' + c[2] + ')'; };
+
+      // Chu kỳ: Day 450s · Sunset 30s · Night 120s = 600s (10 phút), pha = unixSec % 600
+      var DAY_D = 450, SUN_D = 30, NIGHT_D = 120, U = DAY_D + SUN_D + NIGHT_D;
+      var A = DAY_D + SUN_D, X = 25, E = U - X, TOP = 82, ARC = 66;
+
+      function nightness(o) {
+        if (o < DAY_D) return 0;
+        if (o < A) return (o - DAY_D) / SUN_D;
+        if (o < E) return 1;
+        return 1 - (o - E) / X;
+      }
+      function colors(o) {
+        if (o < DAY_D) return DAY;
+        if (o < A) { var a = (o - DAY_D) / SUN_D;
+          return a < .5 ? [lerp(DAY[0],SUNSET[0],a/.5), lerp(DAY[1],SUNSET[1],a/.5)]
+                        : [lerp(SUNSET[0],NIGHT[0],(a-.5)/.5), lerp(SUNSET[1],NIGHT[1],(a-.5)/.5)]; }
+        if (o < E) return NIGHT;
+        var n = (o - E) / X;
+        return n < .5 ? [lerp(NIGHT[0],DAWN[0],n/.5), lerp(NIGHT[1],DAWN[1],n/.5)]
+                      : [lerp(DAWN[0],DAY[0],(n-.5)/.5), lerp(DAWN[1],DAY[1],(n-.5)/.5)];
+      }
+      function render(sec) {
+        var o = ((sec % U) + U) % U, nn = nightness(o), col = colors(o);
+        var f = clamp(o / A, 0, 1), sunUp = o < A, sh = sunUp ? Math.sin(Math.PI * f) : 0;
+        var mr = clamp((o - DAY_D) / (SUN_D + NIGHT_D), 0, 1), moonUp = o >= DAY_D, mh = moonUp ? Math.sin(Math.PI * mr) : 0;
+        if (grad) grad.style.background = 'linear-gradient(180deg, ' + rgb(col[0]) + ' 0%, ' + rgb(col[1]) + ' 100%)';
+        if (stars) stars.style.opacity = clamp((nn - .45) * 1.8, 0, 1);
+        if (clouds) clouds.style.opacity = clamp((1 - nn) * 1.1, .12, 1);
+        if (sun) { sun.style.left = (8 + 84 * f) + '%'; sun.style.top = (TOP - sh * ARC) + '%'; sun.style.opacity = sunUp ? clamp(sh * 1.6, 0, 1) : 0; }
+        if (moon) { moon.style.left = (8 + 84 * mr) + '%'; moon.style.top = (TOP - mh * ARC) + '%'; moon.style.opacity = moonUp ? clamp(mh * 1.6, 0, 1) * clamp(nn * 1.4, 0, 1) : 0; }
+        var dark = document.documentElement.dataset.ui === 'dark';
+        document.documentElement.dataset.ui = nn > (dark ? .5 : .62) ? 'dark' : 'light';
+        document.documentElement.dataset.phase = o < DAY_D ? 'day' : (o < A ? 'sunset' : (o < E ? 'night' : 'dawn'));
+      }
+
+      // Xem trước 1 pha: thêm ?sky=day | sunset | night | dawn (hoặc ?sky=<giây 0..600>) vào URL
+      var pv = location.search.match(/[?&]sky=([^&]+)/);
+      if (pv) {
+        var key = decodeURIComponent(pv[1]).toLowerCase();
+        var map = { day: 240, sunset: 462, night: 520, dawn: 590 };
+        var ov = map[key] != null ? map[key] : parseFloat(key);
+
+        if (!isNaN(ov)) { render(ov); return; } // hiển thị tĩnh để xem trước
+      }
+
+      // Đồng bộ giờ server qua /api/time (có CORS); offline thì dùng đồng hồ máy (cùng công thức nên vẫn đúng pha)
+      var offset = 0;
+      function tick() { render((Date.now() + offset) / 1000); }
+      tick();
+      setInterval(tick, 1000);
+      fetch('https://gag.gg/api/time', { cache: 'no-store' })
+        .then(function (r) { return r.json(); })
+        .then(function (d) { if (d && typeof d.now === 'number') { offset = d.now - Date.now(); tick(); } })
+        .catch(function () {});
+    })();
+  </script>
+
+  <!-- ============ /u/<username> RESOLVER (dùng khi deploy; mở local sẽ tự bỏ qua) ============ -->
+  <script>
+    (function () {
+      var m = location.pathname.match(/\/u\/([^\/?#]+)/i);
+      if (!m) return; // không có /u/... (mở file local / trang gốc) -> giữ PROFILE mặc định
+      var username = decodeURIComponent(m[1]);
+      var $ = function (s) { return document.querySelector(s); };
+      var setText = function (s, v) { var e = $(s); if (e && v != null) e.textContent = v; };
+      var applyAvatar = function (url) { if (!url) return; ['.up__avatar', '.rbxauth__avatar'].forEach(function (s) { var el = $(s); if (el) el.src = url; }); };
+
+      // Ghi đè tùy chọn theo user (carrots/title/tiktok)
+      var OVR = (window.PROFILE_OVERRIDES || {})[username.toLowerCase()] || {};
+      if (OVR.title) setText('.up__title-text', OVR.title);
+      if (OVR.carrots != null) { setText('.up__carrot-count', OVR.carrots); setText('.topbar__carrot-count', OVR.carrots); }
+      if (OVR.tiktok != null) { var tk = $('.up__tiktok'); if (tk) { if (OVR.tiktok) { tk.href = OVR.tiktok; var mm = String(OVR.tiktok).match(/@([\w.]+)/); var lb = tk.querySelector('.up__tiktok-label'); if (lb && mm) lb.textContent = '@' + mm[1]; tk.hidden = false; } else { tk.hidden = true; } } }
+
+      function fill(u) {
+        if (!u) return;
+        document.title = (u.displayName || username) + ' · gag.gg';
+        setText('.up__name-text', u.displayName || username);
+        var vb = $('.up__verified'); if (vb) vb.hidden = !(OVR.verified != null ? OVR.verified : u.verified);
+        setText('.rbxauth__name', u.displayName || username);
+        setText('.up__username', '@' + (u.name || username));
+        if (u.id) { setText('.up__userid', 'Roblox ID ' + u.id); var rb = $('.up__roblox'); if (rb) rb.href = 'https://www.roblox.com/users/' + u.id + '/profile'; }
+        applyAvatar(u.avatar);
+      }
+
+      // 1) Thử serverless cùng origin /api/u (chắc chắn, không CORS). 2) Fallback roproxy (client-side).
+      fetch('/api/u?username=' + encodeURIComponent(username))
+        .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+        .then(function (d) { if (d && d.found) fill(d); else throw 0; })
+        .catch(function () {
+          fetch('https://users.roproxy.com/v1/usernames/users', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ usernames: [username] }) })
+            .then(function (r) { return r.json(); })
+            .then(function (j) {
+              var u = j && j.data && j.data[0]; if (!u) return;
+              fetch('https://thumbnails.roproxy.com/v1/users/avatar-headshot?userIds=' + u.id + '&size=420x420&format=Png&isCircular=false')
+                .then(function (r) { return r.json(); })
+                .then(function (t) { fill({ id: u.id, name: u.name, displayName: u.displayName, verified: u.hasVerifiedBadge, avatar: t && t.data && t.data[0] && t.data[0].imageUrl }); })
+                .catch(function () { fill({ id: u.id, name: u.name, displayName: u.displayName, verified: u.hasVerifiedBadge }); });
+            }).catch(function () {});
+        });
+    })();
+  </script>
+</body>
+</html>
