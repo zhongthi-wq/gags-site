@@ -49,6 +49,10 @@ vercel --prod   # lên production, in ra link <project>.vercel.app
     "itslossi": { tiktok: "https://www.tiktok.com/@itslossi", carrots: 20, title: "Expert Gardener" }
   };
   ```
+- Huy hiệu & huy chương riêng theo user: thêm `badges` / `medals` vào override.
+  - `badges: [{ rarity, icon, label, title }]` — rarity: `legendary | epic | rare | common | tiktok`.
+  - `medals: ["gold","opal","emerald","bronze"]` — chọn/sắp xếp tuỳ ý.
+- URL đẹp: thêm alias vào `window.PROFILE_ALIASES`, ví dụ `"gobi": "nhyva6"` → mở tại `/u/gobi`.
 - `tên + avatar` của mỗi `/u/<username>` được `/api/u` tra tự động từ Roblox (không cần khai báo).
 
 ## Ghi chú

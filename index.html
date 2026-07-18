@@ -567,12 +567,37 @@
       tiktok: "https://www.tiktok.com/@itslossi"          // ⬅️ đổi link TikTok (để "" để ẩn nút)
     };
     // (Tùy chọn) Ghi đè dữ liệu theo từng user khi deploy /u/<username>. Key = username Roblox (viết thường).
+    // Có thể set: verified, tiktok, carrots, title, badges[{rarity,icon,label,title}], medals[<tier>].
+    // rarity: legendary | epic | rare | common | tiktok   ·   tier: gold | opal | emerald | bronze
     window.PROFILE_OVERRIDES = {
-      "itslossi": { verified: true, tiktok: "https://www.tiktok.com/@itslossi", carrots: 9999, title: "Expert Gardener" }
+      "itslossi": { verified: true, tiktok: "https://www.tiktok.com/@itslossi", carrots: 9999, title: "Expert Gardener" },
+      "nhyva6": {
+        tiktok: "https://www.tiktok.com/@0_Gobi", carrots: 4372, title: "Seasoned Grower",
+        badges: [
+          { rarity: "tiktok", label: "Tiktoker", title: "Tiktoker — Nhà sáng tạo nội dung TikTok" },
+          { rarity: "legendary", icon: "🍀", label: "Lucky Harvest", title: "Lucky Harvest — Beat the 1% drop odds" },
+          { rarity: "rare", icon: "🐝", label: "Pollinator", title: "Pollinator — Bred 50 flowers" },
+          { rarity: "common", icon: "💧", label: "Waterer", title: "Waterer — Watered 1,000 crops" }
+        ],
+        medals: ["emerald", "opal", "bronze"]
+      },
+      "lngzzz777": {
+        tiktok: "https://www.tiktok.com/@longsrblx", carrots: 8264, title: "Golden Tycoon",
+        badges: [
+          { rarity: "tiktok", label: "Tiktoker", title: "Tiktoker — Nhà sáng tạo nội dung TikTok" },
+          { rarity: "legendary", icon: "👑", label: "Garden Royalty", title: "Garden Royalty — Owned every rare seed" },
+          { rarity: "epic", icon: "💎", label: "Gem Collector", title: "Gem Collector — Found 100 gems" },
+          { rarity: "rare", icon: "🌻", label: "Sunflower Star", title: "Sunflower Star — Grew a giant sunflower" },
+          { rarity: "common", icon: "🌱", label: "Veteran", title: "Veteran — Playing since launch" }
+        ],
+        medals: ["gold", "opal", "emerald", "bronze"]
+      }
     };
     // URL đẹp: /u/<alias> -> username Roblox thật. Vd: /u/lossi sẽ hiện hồ sơ của ItsLossi.
     window.PROFILE_ALIASES = {
-      "lossi": "ItsLossi"
+      "lossi": "ItsLossi",
+      "gobi": "nhyva6",
+      "king_of_gold": "LNGZZZ777"
     };
   </script>
   <!-- =========================================== -->
@@ -588,7 +613,7 @@
 
       // ----- Text fields -----
       if (P.name) { document.title = P.name + " · gag.gg"; setText(".up__name-text", P.name); setText(".rbxauth__name", P.name); }
-      var vbadge = $(".up__verified"); if (vbadge) vbadge.hidden = (P.verified === false);
+      var vbadge = $(".up__verified"); if (vbadge) { if (P.verified === false) vbadge.setAttribute("hidden", ""); else vbadge.removeAttribute("hidden"); } // SVG: dùng attribute, không dùng .hidden
       if (P.username) setText(".up__username", "@" + P.username);
       if (P.robloxId) setText(".up__userid", "Roblox ID " + P.robloxId);
       if (P.title) setText(".up__title-text", P.title);
@@ -740,17 +765,37 @@
       var setText = function (s, v) { var e = $(s); if (e && v != null) e.textContent = v; };
       var applyAvatar = function (url) { if (!url) return; ['.up__avatar', '.rbxauth__avatar'].forEach(function (s) { var el = $(s); if (el) el.src = url; }); };
 
-      // Ghi đè tùy chọn theo user (carrots/title/tiktok)
+      // Render badges/medals riêng theo user (dùng khi override có .badges / .medals)
+      var TIKTOK_SVG = '<svg class="badge__tiktok" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.6 5.82s.51.5 0 0A4.278 4.278 0 0 1 15.54 3h-3.09v12.4a2.592 2.592 0 0 1-2.59 2.5c-1.42 0-2.6-1.16-2.6-2.6 0-1.72 1.66-3.01 3.37-2.48V9.66c-3.45-.46-6.47 2.22-6.47 5.64 0 3.33 2.76 5.7 5.69 5.7 3.14 0 5.69-2.55 5.69-5.7V9.01a7.35 7.35 0 0 0 4.3 1.38V7.3s-1.88.09-3.34-1.48z" /></svg>';
+      var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+      function renderBadges(list) {
+        var row = $('.up__badges-row'); if (!row || !list || !list.length) return;
+        row.innerHTML = list.map(function (b) {
+          var icon = b.rarity === 'tiktok' ? TIKTOK_SVG : '<span class="badge__icon">' + esc(b.icon || '🌱') + '</span>';
+          return '<span class="badge badge--' + esc(b.rarity || 'common') + '" title="' + esc(b.title || b.label) + '">' + icon + ' ' + esc(b.label) + '</span>';
+        }).join('');
+      }
+      function renderMedals(list) {
+        var row = $('.up__medals-row'); if (!row || !list || !list.length) return;
+        var NAMES = { bronze: 'Bronze', emerald: 'Emerald', opal: 'Opal', gold: 'Gold' };
+        row.innerHTML = list.map(function (t) {
+          return '<div class="medal medal--' + esc(t) + '"><span class="medal__halo"><span class="medal__glow"></span><span class="medal__rays"></span></span><svg class="medal__art" viewBox="0 0 100 132"><use href="#t-medal" /></svg><span class="medal__name">' + esc(NAMES[t] || t) + '</span></div>';
+        }).join('');
+      }
+
+      // Ghi đè tùy chọn theo user (carrots/title/tiktok/badges/medals)
       var OVR = (window.PROFILE_OVERRIDES || {})[username.toLowerCase()] || {};
       if (OVR.title) setText('.up__title-text', OVR.title);
       if (OVR.carrots != null) { setText('.up__carrot-count', OVR.carrots); setText('.topbar__carrot-count', OVR.carrots); }
       if (OVR.tiktok != null) { var tk = $('.up__tiktok'); if (tk) { if (OVR.tiktok) { tk.href = OVR.tiktok; var mm = String(OVR.tiktok).match(/@([\w.]+)/); var lb = tk.querySelector('.up__tiktok-label'); if (lb && mm) lb.textContent = '@' + mm[1]; tk.hidden = false; } else { tk.hidden = true; } } }
+      if (OVR.badges) renderBadges(OVR.badges);
+      if (OVR.medals) renderMedals(OVR.medals);
 
       function fill(u) {
         if (!u) return;
         document.title = (u.displayName || username) + ' · gag.gg';
         setText('.up__name-text', u.displayName || username);
-        var vb = $('.up__verified'); if (vb) vb.hidden = !(OVR.verified != null ? OVR.verified : u.verified);
+        var vb = $('.up__verified'); if (vb) { if (OVR.verified != null ? OVR.verified : u.verified) vb.removeAttribute('hidden'); else vb.setAttribute('hidden', ''); } // SVG: dùng attribute, không dùng .hidden
         setText('.rbxauth__name', u.displayName || username);
         setText('.up__username', '@' + (u.name || username));
         if (u.id) { setText('.up__userid', 'Roblox ID ' + u.id); var rb = $('.up__roblox'); if (rb) rb.href = 'https://www.roblox.com/users/' + u.id + '/profile'; }
